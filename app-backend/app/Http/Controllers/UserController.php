@@ -49,6 +49,12 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         $data = $request->validated();
+        if ($request->file) {
+            $file = $request->file('file');
+            $fileName = time() .  $file->getClientOriginalName();
+            $file = $file->move(storage_path('app/public/uploads'), $fileName);
+            $data['avatar'] = config('app.url') . '/storage/uploads' . '/' . $fileName;
+        }
         User::create($data);
         return $this->sendResponseSuccess('success');
     }

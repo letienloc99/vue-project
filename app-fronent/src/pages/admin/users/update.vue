@@ -15,6 +15,8 @@ const errors = ref();
 const change_password = ref<boolean>(false);
 const user_status = ref([]);
 const department = ref([]);
+const file = ref([]);
+const selectedImage = ref();
 const users = reactive({
   user_name: "",
   name: "",
@@ -25,6 +27,7 @@ const users = reactive({
   status_id: [],
   login_at: "",
   change_password_at: "",
+  avatar: "",
 });
 const {
   user_name,
@@ -36,6 +39,7 @@ const {
   status_id,
   login_at,
   change_password_at,
+  avatar,
 } = toRefs(users);
 watch(
   [
@@ -63,7 +67,7 @@ watch(
 );
 const index = () => {
   axios
-    .get("http://localhost:8000/api/user/create")
+    .get("http://localhost:8080/api/user/create")
     .then((response) => {
       user_status.value = response.data?.result.status;
       department.value = response.data?.result.department;
@@ -74,7 +78,7 @@ const index = () => {
 };
 const get = () => {
   axios
-    .get(`http://localhost:8000/api/user/${route.params.id}`)
+    .get(`http://localhost:8080/api/user/${route.params.id}`)
     .then((response) => {
       user_name.value = response?.data?.user_name;
       name.value = response?.data?.name;
@@ -82,6 +86,7 @@ const get = () => {
       department_id.value = response?.data?.department_id;
       status_id.value = response?.data?.status_id;
       change_password_at.value = response?.data?.change_password_at;
+      avatar.value = response?.data?.avatar;
     })
     .catch(() => {
       message.error("Lấy thông tin thất bại");
@@ -89,7 +94,7 @@ const get = () => {
 };
 const updateUser = () => {
   axios
-    .put(`http://localhost:8000/api/user/${route.params.id}/update`, users)
+    .put(`http://localhost:8080/api/user/${route.params.id}/update`, users)
     .then(function (response) {
       if (response) {
         message.success("Sửa thông tin thành công");
@@ -111,11 +116,21 @@ const filterOption = (input: string, option: any) => {
 const showModal = () => {
   open.value = true;
 };
-
+const handleFileChange = (event: any) => {
+  const fileSelect = event.target.files[0];
+  if (fileSelect) {
+    file.value = fileSelect;
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedImage.value = reader.result;
+    };
+    reader.readAsDataURL(fileSelect);
+  }
+};
 const handleOk = () => {
   loading.value = true;
   axios
-    .delete(`http://localhost:8000/api/user/${route.params.id}/delete`)
+    .delete(`http://localhost:8080/api/user/${route.params.id}/delete`)
     .then(function (response) {
       if (response) {
         message.success("Xóa tài khoản thành công");
@@ -145,13 +160,29 @@ const handleOk = () => {
             <div class="col-12 d-flex justify-content-center mb-3">
               <a-avatar shape="square" :size="200">
                 <template #icon>
-                  <img src="../../../assets/default.png" alt="Avatar" />
+                  <img
+                    v-if="!selectedImage && !avatar"
+                    src="../../../assets/default.png"
+                    alt="Avatar"
+                  />
+                  <img
+                    v-if="!selectedImage && avatar"
+                    :src="avatar"
+                    alt="Avatar"
+                  />
+                  <img v-if="selectedImage" :src="selectedImage" alt="Avatar" />
                 </template>
               </a-avatar>
             </div>
 
+            <input
+              type="file"
+              ref="fileInput"
+              style="display: none"
+              @change="handleFileChange"
+            />
             <div class="col-12 d-flex justify-content-center">
-              <a-button type="primary">
+              <a-button type="primary" @click="$refs.fileInput.click()">
                 <span>Chọn ảnh</span>
               </a-button>
             </div>

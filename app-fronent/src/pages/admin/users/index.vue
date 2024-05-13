@@ -7,23 +7,14 @@ import { message } from "ant-design-vue";
 const storeMenu = useMenu();
 storeMenu.onSelectedKeys(["admin-users"]);
 const users = ref([]);
-const token = localStorage.getItem("token");
-console.log(token)
 const index = () => {
   axios
-    .get("http://localhost:8000/api/admin/user",
-     {
-      headers: { 
-        'Authorization' : `Bearer ${token}`,
-      },
-      
-    })
+    .get("http://localhost:8080/api/user", {})
     .then((response) => {
-      console.log(response)
-      // users.value = response.data?.result || [];
+      users.value = response.data?.result || [];
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       if (error) message.error("Đăng nhập không thành công!!");
     });
 };

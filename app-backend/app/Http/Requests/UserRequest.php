@@ -27,7 +27,8 @@ class UserRequest extends FormRequest
             'name' => "required",
             'email' => "required|email|unique:users,email",
             'department_id' => "required",
-            'password' => "required|confirmed"
+            'password' => "required|confirmed",
+            'file'  => 'nullable'
         ];
     }
     public function messages()

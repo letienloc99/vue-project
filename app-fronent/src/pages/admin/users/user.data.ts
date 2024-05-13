@@ -13,7 +13,7 @@ export const columns = computed<TableProps["columns"]>(() => [
     dataIndex: "avatar",
     customRender: ({ text, record }) => {
       return h("img", {
-        src: record.avatar ? `/public/${record.avatar}` : "/public/default.png",
+        src: record.avatar,
         class: "w-[50px] h-full object-contain",
       });
     },

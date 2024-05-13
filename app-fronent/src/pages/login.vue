@@ -9,7 +9,7 @@ const password = ref<string>("");
 const router = useRouter();
 const loginSubmit = () => {
   axios
-    .post("http://localhost:8000/api/auth/login", {
+    .post("http://localhost:8080/api/auth/login", {
       email: email.value,
       password: password.value,
     })

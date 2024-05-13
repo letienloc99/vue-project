@@ -11,6 +11,8 @@ storeMenu.onSelectedKeys(["admin-users"]);
 const user_status = ref([]);
 const department = ref([]);
 const errors = ref();
+const file = ref([]);
+const selectedImage = ref();
 const users = reactive({
   user_name: "",
   name: "",
@@ -55,7 +57,7 @@ watch(
 );
 const index = () => {
   axios
-    .get("http://localhost:8000/api/user/create")
+    .get("http://localhost:8080/api/user/create")
     .then((response) => {
       user_status.value = response.data?.result.status;
       department.value = response.data?.result.department;
@@ -64,10 +66,32 @@ const index = () => {
       console.log(error);
     });
 };
+const handleFileChange = (event: any) => {
+  const fileSelect = event.target.files[0];
+  if (fileSelect) {
+    file.value = fileSelect;
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedImage.value = reader.result;
+    };
+    reader.readAsDataURL(fileSelect);
+  }
+};
+
+// Thêm dữ liệu người dùng vào FormData
 
 const createUser = () => {
+  const formData = new FormData();
+  for (let key in users) {
+    formData.append(key, users[key]);
+  }
+  formData.append("file", file.value);
   axios
-    .post("http://localhost:8000/api/user", users)
+    .post("http://localhost:8080/api/user", formData, {
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=`,
+      },
+    })
     .then(function (response) {
       if (response) {
         message.success("Tạo mới thành công");
@@ -95,13 +119,23 @@ const filterOption = (input: string, option: any) => {
             <div class="col-12 d-flex justify-content-center mb-3">
               <a-avatar shape="square" :size="200">
                 <template #icon>
-                  <img src="../../../assets/default.png" alt="Avatar" />
+                  <img
+                    v-if="!selectedImage"
+                    src="../../../assets/default.png"
+                    alt="Avatar"
+                  />
+                  <img v-if="selectedImage" :src="selectedImage" alt="Avatar" />
                 </template>
               </a-avatar>
             </div>
-
+            <input
+              type="file"
+              ref="fileInput"
+              style="display: none"
+              @change="handleFileChange"
+            />
             <div class="col-12 d-flex justify-content-center">
-              <a-button type="primary">
+              <a-button type="primary" @click="$refs.fileInput.click()">
                 <span>Chọn ảnh</span>
               </a-button>
             </div>
